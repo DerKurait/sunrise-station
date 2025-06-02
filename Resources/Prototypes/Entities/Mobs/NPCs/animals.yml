@@ -2360,11 +2360,11 @@
       state: penguin
       sprite: Mobs/Animals/penguin.rsi
   - type: Physics
-  # Lust-Start
+  # Sunrise-Start
   - type: Inventory
     speciesId: penguin
     templateId: penguin
-  # Lust-End
+  # Sunrise-End
   - type: Fixtures
     fixtures:
       fix1:
