@@ -87,6 +87,9 @@
     - FullBodyOuter
   - type: Unremoveable
     deleteOnDrop: true
+  - type: TemperatureProtection
+    heatingCoefficient: 0.75
+    coolingCoefficient: 0.5
   - type: ToggleableClothing
     clothingPrototype: ClothingHeadHelmetHeavyArmorFlesh
   - type: FleshBodyMod
