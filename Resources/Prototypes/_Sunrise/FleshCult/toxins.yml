@@ -18,7 +18,7 @@
             tag: "Flesh"
             invert: true
           scaleByQuantity: false
-          ignoreResistances: false
+          ignoreResistances: true
           damage:
             types:
               Caustic: 15
