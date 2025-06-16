@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Numerics;
+using Content.Server.Atmos.Rotting;
 using Content.Server.Body.Components;
 using Content.Server.Construction.Components;
 using Content.Server.Traits.Assorted;
@@ -37,6 +38,8 @@ namespace Content.Server._Sunrise.FleshCult;
 
 public sealed partial class FleshCultSystem
 {
+    [Dependency] private readonly RottingSystem _rotting = default!;
+
     private void InitializeAbilities()
     {
         SubscribeLocalEvent<FleshAbilitiesComponent, FleshCultistHandTransformEvent>(OnHandTransformEvent);
@@ -127,6 +130,13 @@ public sealed partial class FleshCultSystem
             return;
         if (!TryComp<BloodstreamComponent>(target, out var bloodstream))
             return;
+        if (_rotting.IsRotten(target))
+        {
+            _popup.PopupEntity(
+                Loc.GetString("flesh-cultist-devout-target-is-rotting"),
+                uid, uid);
+            return;
+        }
         var hasAppearance = false;
         {
             switch (targetState.CurrentState)
@@ -383,7 +393,7 @@ public sealed partial class FleshCultSystem
         var transferSolution = new Solution();
         foreach (var solution in component.HealBloodAbsorbReagents)
         {
-            transferSolution.AddReagent(solution.Reagent, solution.Quantity * (absorbBlood.Volume / 10));
+            transferSolution.AddReagent(solution.Reagent, solution.Quantity * (absorbBlood.Volume / 30));
         }
 
         if (_solutionContainerSystem.TryGetInjectableSolution(uid, out var injectableSolution, out var _))

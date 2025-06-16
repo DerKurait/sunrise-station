@@ -275,6 +275,14 @@ public sealed partial class FleshCultSystem
             }
         }
 
+        if (_rotting.IsRotten(args.Args.Target.Value))
+        {
+            _popup.PopupEntity(
+                Loc.GetString("flesh-cultist-devout-target-is-rotting"),
+                uid, uid);
+            return;
+        }
+
         // SUNRISE-TODO: Убрать конечности хирургией а тело заменить на скелета
         if (TryComp<HumanoidAppearanceComponent>(args.Args.Target.Value, out var HuAppComponent))
         {
