@@ -224,7 +224,7 @@
         types:
           Slash: 10
           Blunt: 20
-          Structural: 50
+          Structural: 100
     - type: GhostRole
       allowMovement: true
       allowSpeech: true
