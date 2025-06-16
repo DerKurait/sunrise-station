@@ -22,7 +22,7 @@
       injector:
         maxVol: 15
         reagents:
-        - ReagentId: Carol
+        - ReagentId: CarolVirusExtract
           Quantity: 5
   - type: Injector
     injectOnly: false
