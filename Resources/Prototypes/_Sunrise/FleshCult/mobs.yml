@@ -222,9 +222,9 @@
       animation: WeaponArcSmash
       damage:
         types:
-          Slash: 15
-          Blunt: 25
-          Structural: 300
+          Slash: 10
+          Blunt: 20
+          Structural: 50
     - type: GhostRole
       allowMovement: true
       allowSpeech: true

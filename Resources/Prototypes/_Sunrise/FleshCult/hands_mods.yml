@@ -74,8 +74,8 @@
       attackRate: 0.75
       damage:
         types:
-          Blunt: 45
-          Structural: 300
+          Blunt: 30
+          Structural: 50
     - type: Item
       size: Ginormous
 
