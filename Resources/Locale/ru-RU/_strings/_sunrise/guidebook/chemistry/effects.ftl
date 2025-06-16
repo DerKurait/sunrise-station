@@ -1,0 +1,1 @@
+reagent-effect-guidebook-cause-flesh-cultist-infection = Обращает в культиста плоти
