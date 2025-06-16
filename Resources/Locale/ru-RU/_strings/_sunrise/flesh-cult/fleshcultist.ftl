@@ -50,6 +50,7 @@ flesh-cultist-absorb-blood-pool-name = Поглощение лужи крови
 flesh-cultist-absorb-blood-pool-desc = Позволяет поглотить чистые лужи крови для лечения.
 flesh-cultist-devour-name = Поглощение трупа
 flesh-cultist-devour-desc = Вы можете поглотить любое существо из плоти, чтобы получить очки эволюции и исцелить раны.
+flesh-cultist-devout-target-is-rotting = Невозможно поглотить гнилой труп
 flesh-cultist-create-flesh-heart-name = Создание сердца из плоти
 flesh-cultist-create-flesh-heart-desc = Создает сердце из плоти перед вами. Его создание - ваша ключевая задача на станции. Для активации необходимо использовать 3 тела развитых существ из плоти. После активации будьте готовы защищать его от сотрудников службы безопасности.
 flesh-cultist-throw-hugger-name = Бросок лицехвата
