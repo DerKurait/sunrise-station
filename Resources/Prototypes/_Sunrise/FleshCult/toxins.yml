@@ -18,7 +18,7 @@
             tag: "Flesh"
             invert: true
           scaleByQuantity: false
-          ignoreResistances: true
+          ignoreResistances: false
           damage:
             types:
               Caustic: 15
@@ -38,7 +38,22 @@
           visualType: Large
           messages: [ "generic-reagent-effect-burning-insides" ]
           probability: 0.9
-
+  metabolisms:
+    Poison:
+      metabolismRate : 3.00
+      effects:
+      - !type:HealthChange
+        damage:
+          types:
+            Caustic: 15.0
+      - !type:PopupMessage
+        type: Local
+        visualType: Large
+        messages: [ "generic-reagent-effect-burning-insides" ]
+        probability: 0.50
+      - !type:Emote
+        emote: Scream
+        probability: 0.5
 
 - type: reagent
   id: Carol
@@ -51,13 +66,6 @@
   metabolisms:
     Medicine:
       effects:
-      - !type:CauseFleshCultInfection
-        conditions:
-        - !type:HasTag
-          tag: "Flesh"
-          invert: true
-        - !type:ReagentThreshold
-          min: 5
       - !type:ModifyBloodLevel
         conditions:
         - !type:HasTag
@@ -90,5 +98,21 @@
             Caustic: -4
             Slash: -4
 
-
-
+- type: reagent
+  id: CarolVirusExtract
+  name: reagent-name-carol-virus-extract
+  group: Toxins
+  desc: reagent-desc-carol-virus-extract
+  physicalDesc: reagent-physical-desc-necrotic
+  flavor: bitter
+  color: "#c9000e"
+  metabolisms:
+    Medicine:
+      effects:
+      - !type:CauseFleshCultInfection
+        conditions:
+        - !type:HasTag
+          tag: "Flesh"
+          invert: true
+        - !type:ReagentThreshold
+          min: 5
