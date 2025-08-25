@@ -34,3 +34,5 @@ ent-BorgModuleSyndicateCombat = боевой модуль киборга син�
     .desc = { ent-BaseBorgModule.desc }
 ent-BorgModuleStandart = базовый модуль киборга
     .desc = { ent-BaseBorgModule.desc }
+ent-BorgERTModuleStandard = утилитарный модуль киборга ОБР
+    .desc = Универсальный модуль NT, содержащий основные инструменты и медикаменты для операций ОБР.

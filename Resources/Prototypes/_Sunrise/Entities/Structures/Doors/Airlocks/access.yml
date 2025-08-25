@@ -117,32 +117,36 @@
     tag: DockGamma
 
 - type: entity
-  parent: AirlockStandardGlass
-  id: AirlockChapelStandardGlassLocked
-  suffix: Chapel, Locked
-  components:
-  - type: ContainerFill
-    containers:
-      board: [ DoorElectronicsChapel ]
-  - type: Wires
-    layoutId: AirlockService
-
-- type: entity
-  parent: AirlockXeno
-  id: AirlockXenoMaintLocked
-  suffix: Maintenance, Locked
-  components:
-  - type: ContainerFill
-    containers:
-      board: [ DoorElectronicsMaintenance ]
-
-- type: entity
   parent: AirlockGlassShuttle
   id: AirlockExternalGlassCentCommShuttle
-  suffix: External, CentComm, Glass, Docking
+  suffix: External, CentComm, Glass, Docking, AutoDock
   components:
   - type: PriorityDock
     tag: DockCentComm
+
+- type: entity
+  parent: AirlockGlassShuttle
+  id: AirlockExternalGlassMiningShuttle
+  suffix: External, Mining, Glass, Docking, AutoDock
+  components:
+  - type: PriorityDock
+    tag: DockMining
+
+- type: entity
+  parent: AirlockGlassShuttle
+  id: AirlockExternalGlassSecurityShuttle
+  suffix: External, Security, Glass, Docking, AutoDock
+  components:
+  - type: PriorityDock
+    tag: DockSecurity
+
+- type: entity
+  parent: AirlockGlassShuttle
+  id: AirlockExternalGlassPersonalShuttle
+  suffix: External, Personal, Glass, Docking, AutoDock
+  components:
+  - type: PriorityDock
+    tag: DockPersonal
 
 - type: entity
   parent: AirlockExternalGlassShuttleArrivals

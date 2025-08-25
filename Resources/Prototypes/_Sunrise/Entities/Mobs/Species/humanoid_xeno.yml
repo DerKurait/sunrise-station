@@ -5,7 +5,7 @@
   name: Urist McXeno
   abstract: true
   components:
-  - type: Absorbable
+  - type: Interactions
   - type: Respirator
     damage:
       types:
@@ -63,7 +63,6 @@
         layer:
         - MobLayer
   - type: Sprite
-    scale: 1.1, 1.2
     layers:
     - map: [ "enum.HumanoidVisualLayers.Chest" ]
     - map: [ "enum.HumanoidVisualLayers.Snout" ]

@@ -13,7 +13,10 @@
   maleFirstNames: NamesReptilianMale
   femaleFirstNames: NamesReptilianFemale
   naming: FirstDashFirst
-  buttScanTexture: /Textures/_Sunrise/ButtsScans/reptilian.png # Sunrise-Edit
+  # Sunrise-Edit
+  buttScan:
+    sprite: /Textures/_Sunrise/CopyMachine/butts_scans.rsi
+    state: human
 
 - type: bodyType
   id: ReptilianNormal
@@ -34,6 +37,7 @@
     RLeg: MobReptilianRLeg
     LFoot: MobReptilianLFoot
     RFoot: MobReptilianRFoot
+    Back: MobHumanoidAnyMarking # SUNRISE
 
 - type: bodyType
   id: ReptilianSlim
@@ -90,6 +94,11 @@
     Arms:
       points: 2
       required: false
+# SUNRISE
+    Back:
+      points: 2
+      required: false
+# SUNRISE
 
 - type: humanoidBaseSprite
   id: MobReptilianHead

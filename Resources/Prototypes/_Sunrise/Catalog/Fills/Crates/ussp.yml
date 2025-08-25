@@ -53,13 +53,12 @@
   parent: CrateAmmunitionSmall
   id: CrateAmmunitionSmallLightRifle
   name: old small ammunition crate
+  suffix: Filled
   components:
   - type: StorageFill
     contents:
-      - id: SpeedLoaderLightRifle
-        amount: 12
-      - id: MagazineBoxLightRifle
-        amount: 4
+      - id: SpeedLoaderHeavyRifleRFMJ
+        amount: 16
 
 - type: entity
   parent: BaseStructureDynamic
@@ -100,12 +99,10 @@
       - id: WrappedMosin
         amount: 4
   - type: EntityStorageVisuals
-    stateBase: base
     stateDoorOpen: open
     stateDoorClosed: closed
-    stateWelded: welded
   - type: EntityStorage
-    isWeldable: true
+  - type: Weldable
   - type: UserInterface
     interfaces:
       enum.StorageUiKey.Key:

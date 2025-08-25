@@ -4,6 +4,7 @@ using System.Numerics;
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Events;
 using Content.Server.Station.Events;
+using Content.Shared.Atmos.Components;
 using Content.Shared.Body.Components;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
@@ -51,6 +52,7 @@ public sealed partial class ShuttleSystem
     private float FTLCooldown;
     public float FTLMassLimit;
     private TimeSpan _hyperspaceKnockdownTime = TimeSpan.FromSeconds(5);
+    private const float _ftlThrowForce = 20.0f;
 
     /// <summary>
     /// Left-side of the station we're allowed to use
@@ -74,6 +76,7 @@ public sealed partial class ShuttleSystem
     private EntityQuery<BodyComponent> _bodyQuery;
     private EntityQuery<FTLSmashImmuneComponent> _immuneQuery;
     private EntityQuery<StatusEffectsComponent> _statusQuery;
+    private EntityQuery<MovedByPressureComponent> _movedByPressureQuery;
 
     private void InitializeFTL()
     {
@@ -83,6 +86,7 @@ public sealed partial class ShuttleSystem
         _bodyQuery = GetEntityQuery<BodyComponent>();
         _immuneQuery = GetEntityQuery<FTLSmashImmuneComponent>();
         _statusQuery = GetEntityQuery<StatusEffectsComponent>();
+        _movedByPressureQuery = GetEntityQuery<MovedByPressureComponent>();
 
         _cfg.OnValueChanged(CCVars.FTLStartupTime, time => DefaultStartupTime = time, true);
         _cfg.OnValueChanged(CCVars.FTLTravelTime, time => DefaultTravelTime = time, true);
@@ -301,7 +305,8 @@ public sealed partial class ShuttleSystem
         float? startupTime = null,
         float? hyperspaceTime = null,
         string? priorityTag = null,
-        bool ignored = false)
+        bool ignored = false, // Sunrise-Edit
+        bool deletedTrash = false) // Sunrise-Edit
     {
         if (!TrySetupFTL(shuttleUid, component, out var hyperspace))
             return;
@@ -316,6 +321,8 @@ public sealed partial class ShuttleSystem
             _gameTiming.CurTime,
             TimeSpan.FromSeconds(hyperspace.StartupTime));
         hyperspace.PriorityTag = priorityTag;
+        hyperspace.Ignored = ignored; // Sunrise-Edit
+        hyperspace.DeleteTrash = deletedTrash; // Sunrise-Edit
 
         _console.RefreshShuttleConsoles(shuttleUid);
 
@@ -337,6 +344,39 @@ public sealed partial class ShuttleSystem
             Log.Error($"Unable to FTL grid {ToPrettyString(shuttleUid)} to target properly?");
         }
     }
+
+    // Sunrise-Start
+    public void FTLToDockСonfig(
+        EntityUid shuttleUid,
+        ShuttleComponent component,
+        DockingConfig config,
+        float? startupTime = null,
+        float? hyperspaceTime = null,
+        string? priorityTag = null,
+        bool ignored = false,
+        bool deletedTrash = false)
+    {
+        if (!TrySetupFTL(shuttleUid, component, out var hyperspace))
+            return;
+
+        startupTime ??= DefaultStartupTime;
+        hyperspaceTime ??= DefaultTravelTime;
+
+        hyperspace.StartupTime = startupTime.Value;
+        hyperspace.TravelTime = hyperspaceTime.Value;
+        hyperspace.StateTime = StartEndTime.FromStartDuration(
+            _gameTiming.CurTime,
+            TimeSpan.FromSeconds(hyperspace.StartupTime));
+        hyperspace.PriorityTag = priorityTag;
+        hyperspace.Ignored = ignored; // Sunrise-Edit
+        hyperspace.DeleteTrash = deletedTrash; // Sunrise-Edit
+
+        _console.RefreshShuttleConsoles(shuttleUid);
+
+        hyperspace.TargetCoordinates = config.Coordinates;
+        hyperspace.TargetAngle = config.Angle;
+    }
+    // Sunrise-End
 
     private bool TrySetupFTL(EntityUid uid, ShuttleComponent shuttle, [NotNullWhen(true)] out FTLComponent? component)
     {
@@ -372,7 +412,8 @@ public sealed partial class ShuttleSystem
         var uid = entity.Owner;
         var comp = entity.Comp1;
         var xform = _xformQuery.GetComponent(entity);
-        DoTheDinosaur(xform);
+        // Sunrise-Edit
+        //DoTheDinosaur(xform);
 
         comp.State = FTLState.Travelling;
         var fromMapUid = xform.MapUid;
@@ -426,6 +467,10 @@ public sealed partial class ShuttleSystem
         var wowdio = _audio.PlayPvs(comp.TravelSound, uid);
         comp.TravelStream = wowdio?.Entity;
         _audio.SetGridAudio(wowdio);
+
+        // Sunrise-Start
+        DoTheDinosaur(xform, Direction.South.ToVec());
+        // Sunrise-End
     }
 
     /// <summary>
@@ -437,6 +482,16 @@ public sealed partial class ShuttleSystem
         var comp = entity.Comp1;
         comp.StateTime = StartEndTime.FromCurTime(_gameTiming, DefaultArrivalTime);
         comp.State = FTLState.Arriving;
+
+        // Sunrise-Start
+        // Почему оно здесь а не в UpdateFTLArriving?
+        // Ну потому что когда шаттл выходит из фтл он телепортируется
+        // к докам и меняет угол поворота. А вот брошеная сущность все еще летит
+        // в том направлении когда шаттл был в фтл зоне,
+        // как итог полет будет не назад или вперед а в бок.
+        var xform = _xformQuery.GetComponent(entity.Owner);
+        DoTheDinosaur(xform, Direction.North.ToVec());
+        // Sunrise-End
 
         if (entity.Comp1.VisualizerProto != null)
         {
@@ -464,7 +519,8 @@ public sealed partial class ShuttleSystem
         var xform = _xformQuery.GetComponent(uid);
         var body = _physicsQuery.GetComponent(uid);
         var comp = entity.Comp1;
-        DoTheDinosaur(xform);
+        // Sunrise-Edit
+        //DoTheDinosaur(xform);
         _dockSystem.SetDockBolts(entity, false);
 
         _physics.SetLinearVelocity(uid, Vector2.Zero, body: body);
@@ -492,7 +548,7 @@ public sealed partial class ShuttleSystem
                  !HasComp<MapComponent>(target.EntityId))
         {
             var config = _dockSystem.GetDockingConfigAt(uid, target.EntityId, target, entity.Comp1.TargetAngle,
-                priorityTag: entity.Comp1.PriorityTag); // Sunrise-Edit
+                entity.Comp1.Ignored, priorityTag: entity.Comp1.PriorityTag); // Sunrise-Edit
             var mapCoordinates = _transform.ToMapCoordinates(target);
 
             // Couldn't dock somehow so just fallback to regular position FTL.
@@ -502,7 +558,7 @@ public sealed partial class ShuttleSystem
             }
             else
             {
-                FTLDock((uid, xform), config);
+                FTLDock((uid, xform), config, entity.Comp1.DeleteTrash);
             }
 
             mapId = mapCoordinates.MapId;
@@ -607,7 +663,7 @@ public sealed partial class ShuttleSystem
     /// <summary>
     /// Puts everyone unbuckled on the floor, paralyzed.
     /// </summary>
-    private void DoTheDinosaur(TransformComponent xform)
+    private void DoTheDinosaur(TransformComponent xform, Vector2 throwDirection) // Sunrise-Edit
     {
         // Get enumeration exceptions from people dropping things if we just paralyze as we go
         var toKnock = new ValueList<EntityUid>();
@@ -618,10 +674,23 @@ public sealed partial class ShuttleSystem
         {
             foreach (var child in toKnock)
             {
-                if (!_statusQuery.TryGetComponent(child, out var status))
-                    continue;
+                _stuns.TryUpdateParalyzeDuration(child, _hyperspaceKnockdownTime);
 
-                _stuns.TryParalyze(child, _hyperspaceKnockdownTime, true, status);
+                // Sunrise-Start
+                if (_physicsQuery.TryGetComponent(child, out var physics))
+                {
+                    if ((physics.BodyType & BodyType.Static) != 0)
+                        continue;
+
+                    _throwing.TryThrow(child,
+                        throwDirection * _ftlThrowForce,
+                        physics,
+                        Transform(child),
+                        _projQuery,
+                        _ftlThrowForce,
+                        playSound: false);
+                }
+                // Sunrise-End
 
                 // If the guy we knocked down is on a spaced tile, throw them too
                 if (grid != null)
@@ -664,6 +733,11 @@ public sealed partial class ShuttleSystem
             if (!_buckleQuery.TryGetComponent(child, out var buckle) || buckle.Buckled)
                 continue;
 
+            // Sunrise-Start
+            if (_movedByPressureQuery.TryComp(child, out var moved) && !moved.Enabled)
+                continue;
+            // Sunrise-End
+
             toKnock.Add(child);
         }
     }
@@ -681,7 +755,7 @@ public sealed partial class ShuttleSystem
         // only toss if its on lattice/space
         var tile = _mapSystem.GetTileRef(shuttleEntity, shuttleGrid, childXform.Coordinates);
 
-        if (!tile.IsSpace(_tileDefManager))
+        if (!_turf.IsSpace(tile))
             return;
 
         var throwDirection = childXform.LocalPosition - shuttleBody.LocalCenter;
@@ -758,6 +832,7 @@ public sealed partial class ShuttleSystem
             _dockSystem.Dock((dockAUid, dockA), (dockBUid, dockB));
         }
 
+        // Sunrise-Start
         if (deletedTrash &&
             TryComp<FixturesComponent>(shuttle.Owner, out var fixtures) &&
             TryComp<MapGridComponent>(shuttle.Owner, out var shuttleGrid))
@@ -775,11 +850,14 @@ public sealed partial class ShuttleSystem
                 _mapManager.FindGridsIntersecting(shuttle.Comp.MapID, aabb, ref grids, includeMap: false);
                 foreach (var grid in grids)
                 {
-                    if (grid.Owner != config.TargetGrid && grid.Owner != shuttle.Owner)
-                        QueueDel(grid);
+                    if (grid.Owner == config.TargetGrid || grid.Owner == shuttle.Owner)
+                        continue;
+
+                    QueueDel(grid);
                 }
             }
         }
+        // Sunrise-End
     }
 
     /// <summary>
@@ -788,7 +866,7 @@ public sealed partial class ShuttleSystem
     /// </summary>
     /// <param name="minOffset">Min offset for the final FTL.</param>
     /// <param name="maxOffset">Max offset for the final FTL from the box we spawn.</param>
-    private bool TryGetFTLProximity(
+    public bool TryGetFTLProximity( // Sunrise-Edit
         EntityUid shuttleUid,
         EntityCoordinates targetCoordinates,
         out EntityCoordinates coordinates, out Angle angle,

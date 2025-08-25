@@ -14,7 +14,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -34,7 +33,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Silicons
@@ -68,7 +66,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -87,7 +84,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -104,7 +100,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -124,7 +119,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -141,7 +135,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -159,7 +152,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -172,6 +164,7 @@
   - ChaplainJumpsuit
   - CommonBackpack
   - ChaplainOuterClothing
+  - ChaplainBible
   - Glasses
   - Survival
   - Trinkets
@@ -180,7 +173,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -201,7 +193,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -220,7 +211,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -240,7 +230,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -261,7 +250,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -280,7 +268,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Cargo
@@ -312,7 +299,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -342,7 +328,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -369,7 +354,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Engineering
@@ -400,7 +384,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -429,7 +412,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -459,7 +441,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -488,7 +469,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Science
@@ -511,7 +491,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -534,7 +513,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -551,7 +529,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Security
@@ -575,7 +552,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -597,7 +573,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -620,7 +595,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -638,10 +612,10 @@
   - GroupSpeciesBreathToolSecurity
   - SecurityTrinkets  # Sunrise
   # Sunrise-start
+  - SunriseWeaponDetective
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -654,10 +628,10 @@
   - GroupSpeciesBreathToolSecurity
   - SecurityTrinkets  # Sunrise
   # Sunrise-start
+  - SunriseWeaponCadet
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Medical
@@ -688,7 +662,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -715,7 +688,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -745,7 +717,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -777,7 +748,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -809,7 +779,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # Wildcards
@@ -826,7 +795,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -843,7 +811,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -873,7 +840,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 - type: roleLoadout
@@ -891,7 +857,6 @@
   - Bra
   - Pants
   - Socks
-  - CommonPets
   # Sunrise-end
 
 # These loadouts are used for non-crew spawns, like off-station antags and event mobs

@@ -1,16 +1,18 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Content.Server._Sunrise.Chat; //sunrise-edit
+using Content.Server._Sunrise.Chat;
+using Content.Server._Sunrise.Chat.Sanitization;
+using Content.Server._Sunrise.AnnouncementSpeaker;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Chat.Managers;
 using Content.Server.GameTicking;
-using Content.Server.Players.RateLimiting;
 using Content.Server.Speech.Prototypes;
 using Content.Server.Speech.EntitySystems;
-using Content.Server.Station.Components;
+using Content.Server.Speech.Prototypes;
 using Content.Server.Station.Systems;
+using Content.Shared._Sunrise.Antags.Abductor;
 using Content.Shared._Sunrise.CollectiveMind;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Administration;
@@ -25,7 +27,7 @@ using Content.Shared.Players;
 using Content.Shared.Players.RateLimiting;
 using Content.Shared.Popups;
 using Content.Shared.Radio;
-using Content.Shared.Speech;
+using Content.Shared.Station.Components;
 using Content.Shared.Whitelist;
 using Robust.Server.Player;
 using Robust.Shared.Audio;
@@ -38,7 +40,6 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Replays;
 using Robust.Shared.Utility;
-using Content.Server._Sunrise.AntiSpam;
 
 namespace Content.Server.Chat.Systems;
 
@@ -66,12 +67,8 @@ public sealed partial class ChatSystem : SharedChatSystem
     [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
     [Dependency] private readonly ExamineSystemShared _examineSystem = default!;
     [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
+    [Dependency] private readonly AnnouncementSpeakerSystem _announcementSpeaker = default!;
 
-    // Sunrise-TTS-Start: Moved from Server to Shared
-    // public const int VoiceRange = 10; // how far voice goes in world units
-    // public const int WhisperClearRange = 2; // how far whisper goes while still being understandable, in world units
-    // public const int WhisperMuffledRange = 5; // how far whisper goes at all, in world units
-    // Sunrise-TTS-End
     public const string DefaultAnnouncementSound = "/Audio/_Sunrise/Announcements/announce_dig.ogg"; // Sunrise-edit
 
     private bool _loocEnabled = true;
@@ -184,6 +181,12 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool isFormatted = false //sunrise-edit
         )
     {
+        if (TryComp<AbductorComponent>(source, out var comp))
+        {
+            _prototypeManager.TryIndex<CollectiveMindPrototype>(comp.AbductorCollectiveMindProto, out var channel);
+            SendCollectiveMindChat(source, message, channel);
+            return;
+        }
         if (HasComp<GhostComponent>(source))
         {
             // Ghosts can only send dead chat messages, so we'll forward it to InGame OOC.
@@ -202,15 +205,16 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         if (!CanSendInGame(message, shell, player))
             return;
-        //sunrise-edit-start : IC Spam-mute
-        if (player != null)
-        {
-            var ev = new TrySendICMessageEvent(message, desiredType, player);
-            RaiseLocalEvent(source, ev);
-            if (ev.Cancelled)
-                return;
-        }
-        //sunrise-edit-end
+
+        // Sunrise added start - для санитизации чата
+        var trySendEvent = new TrySendChatMessageEvent(message, desiredType);
+        RaiseLocalEvent(source, trySendEvent);
+
+        if (trySendEvent.Cancelled)
+            return;
+
+        message = trySendEvent.Message;
+        // Sunrise added end
 
         ignoreActionBlocker = CheckIgnoreSpeechBlocker(source, ignoreActionBlocker);
 
@@ -308,6 +312,16 @@ public sealed partial class ChatSystem : SharedChatSystem
         if (player?.AttachedEntity is not { Valid: true } entity || source != entity)
             return;
 
+        // Sunrise added start - для санитизации чата
+        var trySendEvent = new TrySendChatMessageEvent(message, oocChatType: type);
+        RaiseLocalEvent(source, trySendEvent);
+
+        if (trySendEvent.Cancelled)
+            return;
+
+        message = trySendEvent.Message;
+        // Sunrise added end
+
         message = SanitizeInGameOOCMessage(message);
 
         var sendType = type;
@@ -338,7 +352,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     #region Announcements
 
     /// <summary>
-    /// Dispatches an announcement to all.
+    /// Dispatches an announcement to all stations through their speaker networks.
     /// </summary>
     /// <param name="message">The contents of the message</param>
     /// <param name="sender">The sender (Communications Console in Communications Console Announcement)</param>
@@ -358,18 +372,25 @@ public sealed partial class ChatSystem : SharedChatSystem
         sender ??= Loc.GetString("chat-manager-sender-announcement");
 
         var wrappedMessage = Loc.GetString("chat-manager-sender-announcement-wrap-message", ("sender", sender), ("message", FormattedMessage.EscapeText(message)));
-        _chatManager.ChatMessageToAll(ChatChannel.Radio, message, wrappedMessage, default, false, true, colorOverride);
-
-        // Sunrise-start
-        if (playDefault && announcementSound == null)
+        
+        // Sunrise-start - Only show in chat for players with working speakers nearby
+        var filteredPlayers = GetPlayersWithWorkingSpeakers();
+        if (filteredPlayers.Recipients.Any())
         {
-            announcementSound ??= new SoundPathSpecifier(DefaultAnnouncementSound);
+            _chatManager.ChatMessageToManyFiltered(filteredPlayers, ChatChannel.Radio, message, wrappedMessage, default, false, true, colorOverride);
         }
+        // Sunrise-end
 
-        if (playTts && announcementSound != null)
+        // Sunrise-start - Use speaker network instead of global broadcast
+        if (playTts && (playDefault || announcementSound != null))
         {
-            var announcementEv = new AnnouncementSpokeEvent(Filter.Broadcast(), message, _audio.ResolveSound(announcementSound), announceVoice);
-            RaiseLocalEvent(announcementEv);
+            if (playDefault && announcementSound == null)
+            {
+                announcementSound = new SoundPathSpecifier(DefaultAnnouncementSound);
+            }
+
+            // Send announcement to all stations through their speaker networks
+            _announcementSpeaker.DispatchAnnouncementToAllStations(message, announcementSound, announceVoice);
         }
         // Sunrise-end
 
@@ -400,16 +421,47 @@ public sealed partial class ChatSystem : SharedChatSystem
         sender ??= Loc.GetString("chat-manager-sender-announcement");
 
         var wrappedMessage = Loc.GetString("chat-manager-sender-announcement-wrap-message", ("sender", sender), ("message", FormattedMessage.EscapeText(message)));
-        _chatManager.ChatMessageToManyFiltered(filter, ChatChannel.Radio, message, wrappedMessage, source ?? default, false, true, colorOverride);
-        // Sunrise-start
-        if (playDefault && announcementSound == null)
-            announcementSound = new SoundPathSpecifier(DefaultAnnouncementSound);
-
-        if (playTts && announcementSound != null)
+        
+        // Sunrise-start - Filter chat recipients by working speakers
+        var filteredChatPlayers = FilterPlayersByWorkingSpeakers(filter);
+        if (filteredChatPlayers.Recipients.Any())
         {
-            RaiseLocalEvent(new AnnouncementSpokeEvent(filter, message, _audio.ResolveSound(announcementSound), announceVoice));
+            _chatManager.ChatMessageToManyFiltered(filteredChatPlayers, ChatChannel.Radio, message, wrappedMessage, source ?? default, false, true, colorOverride);
         }
-        // Sunrise-edit
+        // Sunrise-end
+        
+        // Sunrise-start - For filtered announcements, we may want to try speaker network if source is on a station
+        if (playTts && (playDefault || announcementSound != null))
+        {
+            if (playDefault && announcementSound == null)
+                announcementSound = new SoundPathSpecifier(DefaultAnnouncementSound);
+
+            var resolvedSound = announcementSound != null ? _audio.ResolveSound(announcementSound) : null;
+            
+            // If we have a source, try to use the station's speaker network
+            if (source != null)
+            {
+                var station = _stationSystem.GetOwningStation(source.Value);
+                if (station != null)
+                {
+                    _announcementSpeaker.DispatchAnnouncementToSpeakers(station.Value, message, announcementSound, announceVoice);
+                }
+                else
+                {
+                    // Fallback to old broadcast system for non-station sources
+                    var announcementEv = new AnnouncementSpokeEvent(filter, message, resolvedSound, announceVoice);
+                    RaiseLocalEvent(announcementEv);
+                }
+            }
+            else
+            {
+                // No source, fallback to old broadcast system
+                var announcementEv = new AnnouncementSpokeEvent(filter, message, resolvedSound, announceVoice);
+                RaiseLocalEvent(announcementEv);
+            }
+        }
+        // Sunrise-end
+        
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Station Announcement from {sender}: {message}");
     }
 
@@ -444,21 +496,28 @@ public sealed partial class ChatSystem : SharedChatSystem
             return;
         }
 
-        if (!EntityManager.TryGetComponent<StationDataComponent>(station, out var stationDataComp)) return;
+        if (!TryComp<StationDataComponent>(station, out var stationDataComp)) return;
 
         var filter = _stationSystem.GetInStation(stationDataComp);
 
-        _chatManager.ChatMessageToManyFiltered(filter, ChatChannel.Radio, message, wrappedMessage, source, false, true, colorOverride);
-
-        // Sunrise-start
-        if (playDefault && announcementSound == null)
-            announcementSound = new SoundPathSpecifier(DefaultAnnouncementSound);
-
-        if (playTts && announcementSound != null)
+        // Sunrise-start - Filter chat recipients by working speakers
+        var filteredChatPlayers = FilterPlayersByWorkingSpeakers(filter);
+        if (filteredChatPlayers.Recipients.Any())
         {
-            RaiseLocalEvent(new AnnouncementSpokeEvent(filter, message, _audio.ResolveSound(announcementSound), announceVoice));
+            _chatManager.ChatMessageToManyFiltered(filteredChatPlayers, ChatChannel.Radio, message, wrappedMessage, source, false, true, colorOverride);
         }
-        // Sunrise-edit
+        // Sunrise-end
+
+        // Sunrise-start - Use speaker network for station announcements
+        if (playTts && (playDefault || announcementSound != null))
+        {
+            if (playDefault && announcementSound == null)
+                announcementSound = new SoundPathSpecifier(DefaultAnnouncementSound);
+
+            // Send announcement to this specific station's speaker network
+            _announcementSpeaker.DispatchAnnouncementToSpeakers(station.Value, message, announcementSound, announceVoice);
+        }
+        // Sunrise-end
 
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Station Announcement on {station} from {sender}: {message}");
     }
@@ -481,6 +540,16 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         if (!sourseCollectiveMindComp.Minds.Contains(collectiveMind.ID))
             return;
+
+        // Sunrise added start - для санитизации чата
+        var trySendEvent = new TrySendChatMessageEvent(message, InGameICChatType.CollectiveMind);
+        RaiseLocalEvent(source, trySendEvent);
+
+        if (trySendEvent.Cancelled)
+            return;
+
+        message = trySendEvent.Message;
+        // Sunrise added end
 
         var clients = Filter.Empty();
         var mindQuery = EntityQueryEnumerator<CollectiveMindComponent, ActorComponent>();
@@ -661,7 +730,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
 
-            if (data.Range <= WhisperClearRange)
+            if (data.Range <= WhisperClearRange || data.Observer)
                 _chatManager.ChatMessageToOne(ChatChannel.Whisper, message, wrappedMessage, source, false, session.Channel);
             //If listener is too far, they only hear fragments of the message
             else if (_examineSystem.InRangeUnOccluded(source, listener, WhisperMuffledRange))
@@ -719,8 +788,9 @@ public sealed partial class ChatSystem : SharedChatSystem
             ("entity", ent),
             ("message", isFormatted ? action : FormattedMessage.RemoveMarkupOrThrow(action)));
 
-        if (checkEmote)
-            TryEmoteChatInput(source, action); // sunrise-start
+        if (checkEmote &&
+            !TryEmoteChatInput(source, action))
+            return;
 
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -797,6 +867,53 @@ public sealed partial class ChatSystem : SharedChatSystem
 
     #region Utility
 
+    /// <summary>
+    /// Gets all players who have working announcement speakers nearby.
+    /// Used to filter chat recipients for announcements.
+    /// </summary>
+    private Filter GetPlayersWithWorkingSpeakers()
+    {
+        var filteredPlayers = Filter.Empty();
+        
+        foreach (var player in _playerManager.Sessions)
+        {
+            if (player.AttachedEntity is not { Valid: true } playerEntity)
+                continue;
+
+            if (_announcementSpeaker.HasWorkingSpeakersNearby(playerEntity))
+            {
+                filteredPlayers = filteredPlayers.AddPlayer(player);
+            }
+        }
+
+        return filteredPlayers;
+    }
+
+    /// <summary>
+    /// Filters an existing filter to only include players with working speakers nearby.
+    /// </summary>
+    private Filter FilterPlayersByWorkingSpeakers(Filter originalFilter)
+    {
+        var filteredPlayers = Filter.Empty();
+        
+        foreach (var player in originalFilter.Recipients)
+        {
+            if (player.AttachedEntity is not { Valid: true } playerEntity)
+                continue;
+
+            if (_announcementSpeaker.HasWorkingSpeakersNearby(playerEntity))
+            {
+                filteredPlayers = filteredPlayers.AddPlayer(player);
+            }
+        }
+
+        return filteredPlayers;
+    }
+
+    #endregion
+
+    #region Utility
+
     private enum MessageRangeCheckResult
     {
         Disallowed,
@@ -846,7 +963,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <summary>
     ///     Sends a chat message to the given players in range of the source entity.
     /// </summary>
-    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null)
+    public void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null, Color? color = null)
     {
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -854,7 +971,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             if (entRange == MessageRangeCheckResult.Disallowed)
                 continue;
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
-            _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author);
+            _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author, colorOverride: color);
         }
 
         _replay.RecordServerMessage(new ChatMessage(channel, message, wrappedMessage, GetNetEntity(source), null, MessageRangeHideChatForReplay(range)));
@@ -952,8 +1069,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         return message;
     }
 
-    [ValidatePrototypeId<ReplacementAccentPrototype>]
-    public const string ChatSanitizeAccent = "chatsanitize_sunrise"; // Sunrise-Edit
+    public static readonly ProtoId<ReplacementAccentPrototype> ChatSanitizeAccent = "chatsanitize_sunrise"; // Sunrise-Edit
 
     public string SanitizeMessageReplaceWords(string message)
     {

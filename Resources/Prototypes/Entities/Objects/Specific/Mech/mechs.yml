@@ -91,6 +91,7 @@
     requireAnchored: false
     joinSystem: true
   - type: DoAfter
+  - type: MechVulnerableToEMP # Sunrise-edit
   - type: Repairable
     doAfterDelay: 3
     damage:
@@ -100,6 +101,7 @@
         Piercing: -15
         Caustic: -15
         Structural: -15
+        Mangleness: 7.5 # Sunrise-Edit
   - type: UserInterface
     interfaces:
       enum.MechUiKey.Key:
@@ -125,12 +127,13 @@
     - DoorBumpOpener
     - FootstepSound
   - type: Pullable
-  - type: Clickable
-  - type: WiresPanel
   - type: Physics
-    bodyType: Dynamic
+    bodyType: KinematicController
     angularDamping: 10 # sunrise-edit
     linearDamping: 10 # sunrise-edit
+  - type: GravityAffected
+  - type: Clickable
+  - type: WiresPanel
   - type: Fixtures
     fixtures:
       fix1:
@@ -190,6 +193,8 @@
       - !type:DoActsBehavior
         acts: ["Destruction"]
   - type: Prying
+    speedModifier: 6
+    useSound: /Audio/Machines/airlock_creaking.ogg
   - type: StatusIcon
     bounds: "-0.6,-0.6, 0.6, 0.6"
   - type: PointLight
@@ -226,7 +231,7 @@
     baseState: ripley
     openState: ripley-open
     brokenState: ripley-broken
-    mechToPilotDamageMultiplier: 0.50
+    mechToPilotDamageMultiplier: 0.75
     pilotWhitelist:
       components:
         - HumanoidAppearance
@@ -243,9 +248,9 @@
     baseWalkSpeed: 2.5
     baseSprintSpeed: 5.5 # sunrise-edit
   - type: Reflect
-    reflectProb: 0.15
+    reflectProb: 0.25
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: Tag
@@ -266,6 +271,32 @@
   parent: MechRipley
   suffix: Battery
   components:
+  - type: ContainerFill
+    containers:
+      mech-battery-slot:
+      - PowerCageMedium
+
+# Ripley Mk-I Hauler
+- type: entity
+  id: MechHauler
+  parent: MechRipley
+  suffix: Filled
+  name: APLU "Hauler"
+  description: A cargo tech"s best friend — ready to haul crates, ignore traffic rules on-station, and assert dominance over pedestrians. Still the standard APLU model — Autonomous Power Loading Unit — but now with 30% more dents, lost manifests, and spilled kvass.
+  components:
+  - type: Sprite
+    layers:
+    - map: [ "enum.MechVisualLayers.Base" ]
+      state: hauler
+  - type: Mech
+    baseState: hauler
+    openState: hauler-open
+    brokenState: hauler-broken
+    startingEquipment:
+      - MechEquipmentGrabberSmall
+      - MechEquipmentGrabberSmall
+  - type: MovementSpeedModifier
+    baseSprintSpeed: 5.75 # sunrise-edit
   - type: ContainerFill
     containers:
       mech-battery-slot:
@@ -293,7 +324,7 @@
     baseState: ripleymkii
     openState: ripleymkii-open
     brokenState: ripleymkii-broken
-    mechToPilotDamageMultiplier: 0.30
+    mechToPilotDamageMultiplier: 0.40
     airtight: true
     pilotWhitelist:
       components:
@@ -309,13 +340,13 @@
         Blunt: 20
   - type: MovementSpeedModifier
     baseWalkSpeed: 1.5
-    baseSprintSpeed: 4.3 # sunrise-edit
+    baseSprintSpeed: 4.5 # sunrise-edit
   - type: Damageable
     damageModifierSet: MediumArmorNT
   - type: Reflect
-    reflectProb: 0.20
+    reflectProb: 0.10
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: Tag
@@ -327,7 +358,7 @@
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      500: Critical
+      450: Critical
     showOverlays: false
     allowRevives: true
 
@@ -340,6 +371,170 @@
     containers:
       mech-battery-slot:
       - PowerCageMedium
+
+# Ripley MK-II "Death"
+- type: entity
+  id: MechRipley2Death
+  parent: [ MechRipley2, IndustrialMech, CombatMech, BaseMajorContraband ]
+  name: Ripley APLU MK-II
+  description: The "MK-II" has a pressurized cabin for space opera....wait!! why is it red? Oh no, it's a Death Ripley!
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+    noRot: true
+    sprite: Objects/Specific/Mech/ripley.rsi
+    scale: 1.08, 1.08
+    layers:
+    - map: [ "enum.MechVisualLayers.Base" ]
+      state: death
+  - type: FootstepModifier
+    footstepSoundCollection:
+      path: /Audio/Mecha/sound_mecha_powerloader_step.ogg
+  - type: Mech
+    baseState: death
+    openState: death-open
+    brokenState: death-broken
+    mechToPilotDamageMultiplier: 0.30
+    airtight: true
+    pilotWhitelist:
+      components:
+        - HumanoidAppearance
+    pilotBlacklist:
+      species:
+      - Felinid
+  - type: MeleeThrowOnHit
+    distance: 1
+    speed: 8
+  - type: MeleeWeapon
+    hidden: true
+    attackRate: 1
+    damage:
+      types:
+        Blunt: 30
+        Structural: 20
+    bluntStaminaDamageFactor: 1.5
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 1.5
+    baseSprintSpeed: 4.5 # sunrise-edit
+  - type: Damageable
+    damageModifierSet: HeavyArmorSyndi
+  - type: Reflect
+    reflectProb: 0.15
+    spread: 180
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
+    reflects:
+    - NonEnergy
+  - type: Tag
+    tags:
+    - DoorBumpOpener
+    - FootstepSound
+    - Ripley
+  - type: MobThresholds
+    currentThresholdState : Alive
+    thresholds:
+      0: Alive
+      550: Critical
+    showOverlays: false
+    allowRevives: true
+  - type: AccessReader
+    access: [["SyndicateAgent"]]
+
+- type: entity
+  id: MechRipley2DeathBattery
+  parent: MechRipley2Death
+  suffix: Battery
+  components:
+  - type: ContainerFill
+    containers:
+      mech-battery-slot:
+      - PowerCageMedium
+
+# Paddy
+- type: entity
+  id: MechPaddy
+  parent: [ BaseMech, CombatMech, IndustrialMech, BaseSecurityContraband ]
+  name: Paddy
+  description: Autonomous Power Loader Unit Subtype Paddy. A Modified MK-II Ripley design intended for light security use.
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+    noRot: true
+    sprite: Objects/Specific/Mech/ripley.rsi
+    scale: 1.08, 1.08
+    layers:
+    - map: [ "enum.MechVisualLayers.Base" ]
+      state: paddy
+    # - state: base-sirens  # Todo: port siren system from starlight
+    #   map: [ "enum.MechVisualLayers.Siren" ]
+    #   shader: unshaded
+  - type: FootstepModifier
+    footstepSoundCollection:
+      path: /Audio/Mecha/sound_mecha_powerloader_step.ogg
+  - type: Mech
+    equipmentWhitelist:
+      tags:
+      - CombatMech
+      - IndustrialMech
+    baseState: paddy
+    openState: paddy-open
+    brokenState: paddy-broken
+    mechToPilotDamageMultiplier: 0.50
+    airtight: true
+    #siren: true # Todo: port siren system from starlight
+    pilotWhitelist:
+      components:
+        - HumanoidAppearance
+  - type: Damageable
+    damageModifierSet: MediumArmorNT
+  - type: Reflect
+    reflectProb: 0.10
+    spread: 180
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
+    reflects:
+    - NonEnergy
+  - type: MeleeThrowOnHit
+    distance: 1
+    speed: 8
+  - type: MeleeWeapon
+    hidden: true
+    attackRate: 1
+    damage:
+      types:
+        Blunt: 30 #intentionally shit so people realize that going into combat with the ripley is usually a bad idea.
+        Structural: 10
+    bluntStaminaDamageFactor: 1.5
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 2.5
+    baseSprintSpeed: 4.75
+  - type: PointLight
+    mask: /Textures/Effects/LightMasks/cone.png
+    autoRot: true
+    radius: 5
+    energy: 5
+    enabled: false
+  - type: AccessReader
+    access: [["Security"]]
+
+- type: entity
+  id: MechPaddyBattery
+  parent: MechPaddy
+  suffix: Battery
+  components:
+  - type: ContainerFill
+    containers:
+      mech-battery-slot:
+      - PowerCageMedium
+
+- type: entity
+  id: MechPaddyFilled
+  parent: MechPaddyBattery
+  suffix: Battery, Filled
+  components:
+  - type: Mech
+    startingEquipment:
+      - WeaponMechCombatDisabler
+      - WeaponMechCombatFlashbangLauncher
+      - MechEquipmentGrabberSmall
 
 # Clarke
 - type: entity
@@ -383,9 +578,9 @@
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.1
+    reflectProb: 0.05
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
@@ -469,20 +664,20 @@
       path: "/Audio/Items/drill_use.ogg"
   - type: MovementSpeedModifier
     baseWalkSpeed: 2
-    baseSprintSpeed: 4.2 # sunrise-edit
+    baseSprintSpeed: 4.5 # sunrise-edit
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.20
+    reflectProb: 0.05
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      500: Critical
+      450: Critical
     showOverlays: false
     allowRevives: true
   - type: PointLight
@@ -544,16 +739,16 @@
       species:
       - Felinid
   - type: Reflect
-    reflectProb: 0.15
+    reflectProb: 0.35
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      350: Critical
+      450: Critical
     showOverlays: false
     allowRevives: true
 
@@ -619,9 +814,9 @@
     baseWalkSpeed: 2.4
     baseSprintSpeed: 5.2 # sunrise-edit
   - type: Reflect
-    reflectProb: 0.15
+    reflectProb: 0.05
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
@@ -703,7 +898,7 @@
   - type: Reflect
     reflectProb: 0.15
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
@@ -753,9 +948,9 @@
     footstepSoundCollection:
       path: /Audio/Mecha/sound_mecha_powerloader_step.ogg
   - type: Mech
-    baseState: gygax
-    openState: gygax-open
-    brokenState: gygax-broken
+    baseState: base
+    openState: base-open
+    brokenState: base-broken
     mechToPilotDamageMultiplier: 0.25
     airtight: true
     pilotWhitelist:
@@ -779,16 +974,16 @@
     baseWalkSpeed: 2
     baseSprintSpeed: 5.2 # sunrise-edit
   - type: Reflect
-    reflectProb: 0.20
+    reflectProb: 0.15
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      540: Critical
+      500: Critical
     showOverlays: false
     allowRevives: true
   - type: Tag
@@ -821,14 +1016,14 @@
     scale: 1.08, 1.08
     layers:
     - map: [ "enum.MechVisualLayers.Base" ]
-      state: durand
+      state: base
   - type: FootstepModifier
     footstepSoundCollection:
       path: /Audio/Mecha/sound_mecha_powerloader_step.ogg
   - type: Mech
-    baseState: durand
-    openState: durand-open
-    brokenState: durand-broken
+    baseState: base
+    openState: base-open
+    brokenState: base-broken
     mechToPilotDamageMultiplier: 0.20
     airtight: true
     pilotWhitelist:
@@ -856,16 +1051,16 @@
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.20
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      750: Critical
+      600: Critical
     showOverlays: false
     allowRevives: true
   - type: Tag
@@ -929,7 +1124,7 @@
   - type: Reflect
     reflectProb: 0.65
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
     - Energy
@@ -1002,11 +1197,11 @@
     bluntStaminaDamageFactor: 1.5
   - type: MovementSpeedModifier
     baseWalkSpeed: 2
-    baseSprintSpeed: 4.7 # sunrise-edit
+    baseSprintSpeed: 5.2 # sunrise-edit
   - type: Reflect
-    reflectProb: 0.20
+    reflectProb: 0.15
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: Damageable
@@ -1017,7 +1212,7 @@
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      550: Critical
+      500: Critical
     showOverlays: false
     allowRevives: true
   - type: Tag
@@ -1100,16 +1295,16 @@
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.20
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      800: Critical
+      600: Critical
     showOverlays: false
     allowRevives: true
   - type: AccessReader
@@ -1181,22 +1376,22 @@
     bluntStaminaDamageFactor: 1.5
   - type: MovementSpeedModifier
     baseWalkSpeed: 1
-    baseSprintSpeed: 3.2 # sunrise-edit
+    baseSprintSpeed: 3.7 # sunrise-edit
   - type: Damageable
     damageModifierSet: HeavyArmorNT
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.20
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      800: Critical
+      600: Critical
     showOverlays: false
     allowRevives: true
   - type: AccessReader
@@ -1237,7 +1432,7 @@
   - type: Sprite
     drawdepth: Mobs
     noRot: true
-    sprite: Objects/Specific/Mech/gygax.rsi
+    sprite: Objects/Specific/Mech/mecha.rsi
     scale: 1.08, 1.08
     layers:
     - map: [ "enum.MechVisualLayers.Base" ]
@@ -1271,22 +1466,22 @@
     bluntStaminaDamageFactor: 1.5
   - type: MovementSpeedModifier
     baseWalkSpeed: 2
-    baseSprintSpeed: 4.8 # sunrise-edit
+    baseSprintSpeed: 5.5 # sunrise-edit
   - type: Damageable
     damageModifierSet: MediumArmorSyndi
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.15
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      550: Critical
+      500: Critical
     showOverlays: false
     allowRevives: true
   - type: Tag
@@ -1367,16 +1562,16 @@
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.20
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: MobThresholds
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      750: Critical
+      600: Critical
     showOverlays: false
     allowRevives: true
   - type: AccessReader
@@ -1452,9 +1647,9 @@
   - type: CanMoveInAir
   - type: MovementAlwaysTouching
   - type: Reflect
-    reflectProb: 0.25
+    reflectProb: 0.20
     spread: 180
-    soundOnReflect: /Audio/Weapons/block_metal1.ogg
+    soundOnReflect: /Audio/_Starlight/Armor/Ricochet/ricochet1_1.ogg
     reflects:
     - NonEnergy
   - type: Tag
@@ -1466,7 +1661,7 @@
     currentThresholdState : Alive
     thresholds:
       0: Alive
-      800: Critical
+      600: Critical
     showOverlays: false
     allowRevives: true
   - type: AccessReader

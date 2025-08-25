@@ -52,6 +52,7 @@ namespace Content.Server.Power.EntitySystems
             UpdatesAfter.Add(typeof(NodeGroupSystem));
             _solver = new(_cfg.GetCVar(CCVars.DebugPow3rDisableParallel));
 
+            SubscribeLocalEvent<ApcPowerReceiverComponent, MapInitEvent>(ApcPowerReceiverMapInit);
             SubscribeLocalEvent<ApcPowerReceiverComponent, ComponentInit>(ApcPowerReceiverInit);
             SubscribeLocalEvent<ApcPowerReceiverComponent, ComponentShutdown>(ApcPowerReceiverShutdown);
             SubscribeLocalEvent<ApcPowerReceiverComponent, ComponentRemove>(ApcPowerReceiverRemove);
@@ -79,6 +80,11 @@ namespace Content.Server.Power.EntitySystems
         private void DebugPow3rDisableParallelChanged(bool val)
         {
             _solver = new(val);
+        }
+
+        private void ApcPowerReceiverMapInit(Entity<ApcPowerReceiverComponent> ent, ref MapInitEvent args)
+        {
+            _appearance.SetData(ent, PowerDeviceVisuals.Powered, ent.Comp.Powered);
         }
 
         private void ApcPowerReceiverInit(EntityUid uid, ApcPowerReceiverComponent component, ComponentInit args)
@@ -307,7 +313,7 @@ namespace Content.Server.Power.EntitySystems
 
             if (_frameCount % 100 == 0)
             {
-                Logger.Info($"PowerNetSystem: Last frame time: {_lastFrameTime:F2}ms, Average frame time: {_averageFrameTime:F2}ms");
+                Logger.Debug($"PowerNetSystem: Last frame time: {_lastFrameTime:F2}ms, Average frame time: {_averageFrameTime:F2}ms"); // Sunrise-edit
             }
         }
 

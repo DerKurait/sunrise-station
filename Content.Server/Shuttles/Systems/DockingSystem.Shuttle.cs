@@ -133,12 +133,13 @@ public sealed partial class DockingSystem
         EntityCoordinates coordinates,
         Angle angle,
         bool fallback = true,
+        bool ignored = true,
         string? priorityTag = null) // Sunrise-Edit
     {
         var gridDocks = GetDocks(targetGrid);
         var shuttleDocks = GetDocks(shuttleUid);
 
-        var configs = GetDockingConfigs(shuttleUid, targetGrid, shuttleDocks, gridDocks, priorityTag); // Sunrise-Edit
+        var configs = GetDockingConfigs(shuttleUid, targetGrid, shuttleDocks, gridDocks, priorityTag, ignored); // Sunrise-Edit
 
         foreach (var config in configs)
         {
@@ -159,7 +160,7 @@ public sealed partial class DockingSystem
     /// <summary>
     /// Gets all docking configs between the 2 grids.
     /// </summary>
-    private List<DockingConfig> GetDockingConfigs(
+    public List<DockingConfig> GetDockingConfigs( // Sunrise-Edit
         EntityUid shuttleUid,
         EntityUid targetGrid,
         List<Entity<DockingComponent>> shuttleDocks,
@@ -341,6 +342,7 @@ public sealed partial class DockingSystem
                         Coordinates = gridPosition,
                         Area = cacheDockedAABB,
                         Angle = cacheTargetAngle,
+                        TargetGrid = targetGrid,
                     });
                 }
             });

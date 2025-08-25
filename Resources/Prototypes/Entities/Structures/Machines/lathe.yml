@@ -140,7 +140,8 @@
     - HydroponicsStatic
   - type: EmagLatheRecipes
     emagStaticPacks:
-    - SecurityAmmoStatic
+    #- SecurityAmmoStatic
+    - SecurityStaticSunrise
   - type: BlueprintReceiver
     whitelist:
       tags:
@@ -192,6 +193,8 @@
         - Sheet
         - RawMaterial
         - Ingot
+        - SheetPaper #Sunrise-edit
+
   - type: OreSiloClient
   - type: Lathe
     idleState: icon
@@ -199,6 +202,7 @@
     unlitIdleState: unlit
     unlitRunningState: unlit-building
     staticPacks:
+    - PaperStatic #Sunrise-edit
     - ChemistryStatic
     - SurgeryStatic
     dynamicPacks:
@@ -229,6 +233,11 @@
     - SecurityEquipment
     - SecurityWeapons
     - SecurityDynamicSunrise # Sunrise-Add
+    - SecurityDynamicSunriseClothing # Sunrise-Add
+    - SecurityDynamicSunriseMech # Sunrise-Add
+    - MedicalCyberlimbDynamic # Sunrise-Add
+    - MedicalCyberOrgansDynamic # Sunrise-Add
+    - MedicalImplantDynamic # Sunrise-Add
 
 - type: entity
   id: ProtolatheHyperConvection
@@ -336,6 +345,9 @@
     - MechParts
     - MechEquipment
     - RoboticsDynamicSunrise # Sunrise-Add
+    - MedicalCyberlimbDynamic # Sunrise-Add
+    - MedicalCyberOrgansDynamic # Sunrise-Add
+    - MedicalImplantDynamic # Sunrise-Add
   - type: MaterialStorage
     whitelist:
       tags:
@@ -413,7 +425,7 @@
     staticPacks:
     - SecurityEquipmentStatic
     - SecurityPracticeStatic
-    - SecurityAmmoStatic
+    #- SecurityAmmoStatic
     - SecurityWeaponsStatic
     - SecurityStaticSunrise # Sunrise-Add
     dynamicPacks:
@@ -426,6 +438,8 @@
     - SecurityWeapons
     - SecurityDisablers
     - SecurityDynamicSunrise # Sunrise-Add
+    - SecurityDynamicSunriseClothing # Sunrise-Add
+    - SecurityDynamicSunriseMech # Sunrise-Add
   - type: MaterialStorage
     whitelist:
       tags:
@@ -461,7 +475,8 @@
       idleState: icon
       runningState: icon
       staticPacks:
-      - SecurityAmmoStatic
+      #- SecurityAmmoStatic
+      - SecurityStaticSunrise # Sunrise-Add
     - type: MaterialStorage
       whitelist:
         tags:
@@ -505,6 +520,9 @@
     - Chemistry
     - SurgeryDynamicSunrise # Sunrise-Add
     - MedicalDynamicSunrise # Sunrise-Add
+    - MedicalCyberlimbDynamic # Sunrise-Add
+    - MedicalCyberOrgansDynamic # Sunrise-Add
+    - MedicalImplantDynamic # Sunrise-Add
   - type: Machine
     board: MedicalTechFabCircuitboard
   - type: StealTarget

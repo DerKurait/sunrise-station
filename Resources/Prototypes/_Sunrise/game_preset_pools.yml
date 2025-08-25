@@ -1,0 +1,31 @@
+- type: gamePresetPool
+  id: DefaultLowPopPresetPool
+  presets:
+    Greenshift: [0, 200]
+    Secret: [20, 200]
+
+- type: gamePresetPool
+  id: DefaultHighPopPresetPool
+  presets:
+    Greenshift: [0, 200]
+    Secret: [20, 200]
+
+- type: gamePresetPool
+  id: DynamicPresetPool
+  presets:
+    Greenshift: [0, 200]
+    Dynamic: [20, 200]
+
+- type: gamePresetPool
+  id: MiddleLowPopPresetPool
+  presets:
+   Greenshift: [0, 200]
+   Secret: [30, 200]
+   Extra: [30, 200]
+
+- type: gamePresetPool
+  id: MiddleHighPopPresetPool
+  presets:
+    Greenshift: [0, 200]
+    Secret: [50, 200]
+    Extra: [50, 100]
