@@ -26,7 +26,7 @@ public sealed partial class CrewMonitoringConsoleComponent : Component
     ///     Whether the console should beep when corpses with sensors are detected outside morgues.
     /// </summary>
     [DataField("CrewMonitoringMode"), ViewVariables(VVAccess.ReadWrite)]
-    public CrewMonitoringMode Mode = CrewMonitoringMode.ToggleOff;
+    public CrewMonitoringMode Mode = CrewMonitoringMode.Both;
 
     /// <summary>
     ///     Next time to check for corpses and potentially play alert sound.
