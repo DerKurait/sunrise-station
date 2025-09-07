@@ -90,7 +90,5 @@ namespace Content.Shared.Verbs
             new("verb-categories-adjust", "/Textures/Interface/VerbIcons/screwdriver.png");
 
         public static readonly VerbCategory Switch = new("verb-categories-switch", "/Textures/Interface/VerbIcons/group.svg.192dpi.png"); // Starlight-surgery
-
-        public static readonly VerbCategory SetCrewMonitoring = new("verb-categories-set-crew-monitoring", null); //Sunrise-Edit
     }
 }
